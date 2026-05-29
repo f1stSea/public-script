@@ -1,0 +1,88 @@
+networks:
+  1panel-network:
+    external: true
+
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: current-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: current
+      POSTGRES_USER: current
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c effective_cache_size=256MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-127.0.0.1:5432}:5432"
+    networks:
+      - 1panel-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U current"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  backend:
+    image: ghcr.io/f1stsea/current-backend:latest
+    container_name: current-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://current:${DB_PASSWORD}@current-db:5432/current
+      SYNC_DATABASE_URL: postgresql://current:${DB_PASSWORD}@current-db:5432/current
+    ports:
+      - "${BACKEND_PORT:-127.0.0.1:8000}:8000"
+    networks:
+      - 1panel-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  worker:
+    image: ghcr.io/f1stsea/current-backend:latest
+    container_name: current-worker
+    restart: unless-stopped
+    command: python -m app.worker
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://current:${DB_PASSWORD}@current-db:5432/current
+      SYNC_DATABASE_URL: postgresql://current:${DB_PASSWORD}@current-db:5432/current
+    networks:
+      - 1panel-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  frontend:
+    image: ghcr.io/f1stsea/current-frontend:latest
+    container_name: current-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3199}:80"
+    networks:
+      - 1panel-network
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+volumes:
+  pgdata:
