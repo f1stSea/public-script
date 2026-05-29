@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-COMPOSE_URL="https://raw.githubusercontent.com/f1stSea/public-script/main/docker-compose.yml"
+COMPOSE_URL="https://raw.githubusercontent.com/f1stSea/public-script/main/evergreen/docker-compose.yml"
 DEPLOY_DIR="${HOME}/evergreen"
 
 echo "🌿 Evergreen Dashboard"
