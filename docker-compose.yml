@@ -1,0 +1,20 @@
+networks:
+  1panel-network:
+    external: true
+
+services:
+  evergreen:
+    image: ghcr.io/f1stsea/evergreen-dashboard:latest
+    container_name: evergreen
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3198}:3000"
+    networks:
+      - 1panel-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    labels:
+      createdBy: "Apps"
