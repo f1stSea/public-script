@@ -13,11 +13,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     command: >
       postgres
-      -c shared_buffers=128MB
-      -c effective_cache_size=256MB
-      -c work_mem=4MB
-      -c maintenance_work_mem=32MB
-      -c max_connections=20
+      -c shared_buffers=64MB
+      -c effective_cache_size=128MB
+      -c work_mem=2MB
+      -c maintenance_work_mem=16MB
+      -c max_connections=10
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -32,7 +32,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 256M
 
   backend:
     image: ghcr.io/f1stsea/current-backend:latest
@@ -51,25 +51,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
-
-  worker:
-    image: ghcr.io/f1stsea/current-backend:latest
-    container_name: current-worker
-    restart: unless-stopped
-    command: python -m app.worker
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql+asyncpg://current:${DB_PASSWORD}@current-db:5432/current
-      SYNC_DATABASE_URL: postgresql://current:${DB_PASSWORD}@current-db:5432/current
-    networks:
-      - 1panel-network
-    deploy:
-      resources:
-        limits:
-          memory: 256M
+          memory: 300M
 
   frontend:
     image: ghcr.io/f1stsea/current-frontend:latest
