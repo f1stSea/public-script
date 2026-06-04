@@ -38,9 +38,19 @@ if [ -z "$DB_PASSWORD" ]; then
   echo "🔑 Generated new DB password"
 fi
 
+# ── SECRET_KEY：现有 .env 保留，否则生成 ────────────────────
+if [ -f .env ]; then
+  SECRET_KEY=$(grep '^SECRET_KEY=' .env | cut -d= -f2)
+fi
+if [ -z "$SECRET_KEY" ]; then
+  SECRET_KEY=$(openssl rand -hex 32)
+  echo "🔑 Generated new SECRET_KEY"
+fi
+
 # ── 写入 .env ──────────────────────────────────────────
 cat > .env <<EOF
 DB_PASSWORD=${DB_PASSWORD}
+SECRET_KEY=${SECRET_KEY}
 FRONTEND_PORT=${FRONTEND_PORT}
 BACKEND_PORT=${BACKEND_PORT}
 DB_PORT=${DB_PORT}
