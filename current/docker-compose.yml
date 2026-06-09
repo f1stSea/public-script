@@ -45,6 +45,12 @@ services:
       DATABASE_URL: postgresql+asyncpg://current:${DB_PASSWORD}@current-db:5432/current
       SYNC_DATABASE_URL: postgresql://current:${DB_PASSWORD}@current-db:5432/current
       SECRET_KEY: ${SECRET_KEY}
+      TUSHARE_TOKEN: ${TUSHARE_TOKEN:-}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
+      LONGBRIDGE_APP_KEY: ${LONGBRIDGE_APP_KEY:-}
+      LONGBRIDGE_APP_SECRET: ${LONGBRIDGE_APP_SECRET:-}
+      LONGBRIDGE_ACCESS_TOKEN: ${LONGBRIDGE_ACCESS_TOKEN:-}
     ports:
       - "${BACKEND_PORT:-127.0.0.1:8000}:8000"
     networks:
