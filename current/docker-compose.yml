@@ -17,7 +17,7 @@ services:
       -c effective_cache_size=128MB
       -c work_mem=2MB
       -c maintenance_work_mem=16MB
-      -c max_connections=10
+      -c max_connections=20
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -55,6 +55,11 @@ services:
       - "${BACKEND_PORT:-127.0.0.1:8000}:8000"
     networks:
       - 1panel-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
     deploy:
       resources:
         limits:
