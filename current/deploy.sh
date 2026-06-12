@@ -57,6 +57,9 @@ if [ -z "$SECRET_KEY" ]; then
 fi
 
 # ── 用户提供类 API Key：有就保留，没有就交互式询问 ────────
+# 注意：[ -t 0 ] 检测 stdin 是否为 TTY。
+# 非 TTY（如 ssh 脚本、CI）时直接留空，避免 read 把脚本下一行作为用户输入，
+# 导致 .env 被写入脚本文本而非真实 Key。
 read_key_if_missing() {
   local key=$1 prompt=$2
   local current_val
@@ -64,9 +67,13 @@ read_key_if_missing() {
   if [ -n "$current_val" ]; then
     echo "ℹ️  Keeping existing ${key}"
     eval "${key}='${current_val}'"
-  else
+  elif [ -t 0 ]; then
+    # 交互式终端：正常询问
     read -rp "🔑 ${prompt}（留空跳过）: " input_val
     eval "${key}='${input_val:-}'"
+  else
+    # 非交互式（ssh/CI）：默认为空，不读 stdin
+    eval "${key}=''"
   fi
 }
 
